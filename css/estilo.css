@@ -1,0 +1,233 @@
+/* Video de fondo */
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Poppins:wght@400;600&display=swap');
+body{
+    padding-top: 20px;
+    font-family: 'Popins', sans-serif ;
+}
+
+#fondo-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+/* NAVBAR */
+.navbar {
+    padding: 15px 20px;
+    position: static;
+    top: 0;
+    width: 100%;
+    z-index: 10;
+    margin: 0;
+}
+/* Navbar container */
+.navbar .container-fluid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* desktop: logo a la izquierda, hamburguesa a la derecha */
+    position: relative;
+}
+
+/* Wrapper logo + links (desktop) */
+.navbar-desktop-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* espacio entre logo y links */
+    margin: 0 auto; /* centra todo el bloque */
+}
+
+/* Logo */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 11;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+
+/* Links */
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Color blanco de links */
+.navbar-nav .nav-link {
+    color: white !important;
+    font-size: 1.1rem; /* un poco más grande */
+    font-weight: 500;
+    transition: color 0.3s;
+    font-family: 'Permanent Marker', cursive;
+}
+.navbar-nav .nav-link:hover {
+    color: #f0c14b !important; /* Color dorado elegante al pasar el mouse */
+}
+/* Botón hamburguesa */
+.navbar-toggler {
+    position: absolute;
+    right: 0;
+    z-index: 12;
+}
+/* Fondo negro para el dropdown del carrito */
+.navbar .dropdown-menu {
+    background-color: #111 !important; /* fondo negro */
+    color: white; /* texto blanco */
+}
+
+/* Asegurar que los textos dentro se vean */
+.navbar .dropdown-menu p,
+.navbar .dropdown-menu span,
+.navbar .dropdown-menu strong {
+    color: white !important;
+}
+
+/* Opcional: cambiar color de los botones dentro del dropdown */
+.navbar .dropdown-menu .btn {
+    color: black;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .navbar .container-fluid {
+        justify-content: center; /* logo centrado */
+    }
+
+    /* Collapse alineado a la derecha */
+    .navbar-collapse {
+        position: absolute;
+        top: 100%;         /* justo debajo del navbar */
+        right: 0;          /* pegado a la derecha */
+        width: auto;        /* solo ocupa lo que necesita */
+        background: #000000; /* mantiene fondo transparente */
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;  /* links alineados a la derecha */
+        padding: 10px 20px;
+        border-radius: 10px;
+        z-index: 11;
+    }
+
+    .navbar-nav {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-end; /* links alineados a la derecha */
+    }
+}
+
+/* Sección de catálogo */
+.catalogo-section {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.servicios-destacados {
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 40px;
+    font-weight: 600;
+}
+
+/* Galería de catálogo */
+.catalogo-seccion {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* Cada cuadro */
+.catalogo-card {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* hace que sea cuadrado */
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+/* Imagen del cuadro */
+.catalogo-card img {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+/* Hover: zoom y marco blanco */
+.catalogo-card:hover img {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 5px white;
+}
+
+/* Texto sobre la imagen */
+.catalogo-texto {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+.catalogo-card:hover .catalogo-texto {
+    background: rgba(0,0,0,0.8);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #111;
+}
+body, h2, p, ul, li, .carousel-caption, .btn {
+    color: white !important;
+}
+.checkout-container {
+    background-color: #000; /* recuadro negro */
+    color: white;           /* texto blanco */
+    padding: 25px;
+    border-radius: 10px;
+}
+
+.total-box {
+    background-color: #111;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+    text-align: right;
+}
+
+.list-group-item {
+    background-color: #111;
+    color: white;
+    border: 1px solid #333;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+#paypal-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.table-container {
+  max-height: 300px;   /* altura máxima de la tabla */
+  overflow-y: auto;    /* scroll vertical si se pasa de la altura */
+  border: 1px solid #dee2e6; /* opcional: borde para delimitar */
+}
+
+

@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1755290881122,
+    "name": "hello",
+    "price": 20,
+    "stock": 4,
+    "description": "Gorra urbana de estilo único con ajuste regulable. Ideal para outfits casuales y urbanos.",
+    "images": [
+      "img/catalogo1.png",
+      "img/catalogo1.png",
+      "img/catalogo1.png"
+    ]
+  },
+  {
+    "id": 1755291117905,
+    "name": "2",
+    "price": 3,
+    "stock": 4,
+    "description": "Gorra urbana de estilo único con ajuste regulable. Ideal para outfits casuales y urbanos.",
+    "images": [
+      "img/catalogo1.png",
+      "img/catalogo1.png",
+      "img/catalogo1.png"
+    ]
+  },
+  {
+    "id": 1755293438089,
+    "name": "nuevo",
+    "price": 30,
+    "stock": 3,
+    "description": "ola",
+    "images": []
+  }
+]
