@@ -1,3 +1,6 @@
+const PAYPAL_CLIENT_ID = "PON_AQUI_EL_CLIENT_ID_DE_TU_CLIENTE";
+const PAYPAL_CLIENT_SECRET = "PON_AQUI_LA_SECRET_KEY_QUE_TE_PASARON";
+const PAYPAL_API = "https://api-m.paypal.com"; // Usa "https://api-m.sandbox.paypal.com" si fuera prueba
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
@@ -6,14 +9,46 @@ const multer = require("multer");
 const db = require("./db");
 
 const app = express();
-const PORT = 3000;
-
+const PORT = process.env.PORT || 3000;
 // ===== Configuración Multer para imágenes =====
 const upload = multer({ dest: path.join(__dirname, "uploads") });
 
+// Función auxiliar para verificar el pago con PayPal
+async function verificarPagoPayPal(orderID) {
+    try {
+        // 1. Obtener Token de Acceso
+        const auth = Buffer.from(PAYPAL_CLIENT_ID + ":" + PAYPAL_CLIENT_SECRET).toString("base64");
+        const tokenRes = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
+            method: "POST",
+            body: "grant_type=client_credentials",
+            headers: {
+                "Authorization": `Basic ${auth}`,
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+        });
+        const tokenData = await tokenRes.json();
+        
+        if (!tokenData.access_token) return false;
+
+        // 2. Consultar detalles de la orden
+        const ordenRes = await fetch(`${PAYPAL_API}/v2/checkout/orders/${orderID}`, {
+            headers: {
+                "Authorization": `Bearer ${tokenData.access_token}`
+            }
+        });
+        const ordenData = await ordenRes.json();
+
+        // 3. Verificar que esté completada (COMPLETED o APPROVED)
+        return ordenData.status === "COMPLETED" || ordenData.status === "APPROVED";
+    } catch (error) {
+        console.error("Error verificando PayPal:", error);
+        return false;
+    }
+}
 
 // ===== Middleware =====
 app.use(bodyParser.json());
+// Nota: Puedes reemplazar bodyParser.json() por app.use(express.json())
 app.use(express.static(path.join(__dirname, ".."))); // sirve HTML, JS, CSS
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // ===== Rutas Pedidos =====
@@ -24,9 +59,19 @@ app.get("/api/pedidos", (req, res) => {
   });
 });
 
-app.post("/api/pedidos", (req, res) => {
+// RUTA POST /api/pedidos (ÚNICA Y CORREGIDA: Registra pedido y actualiza stock)
+app.post("/api/pedidos", async (req, res) => { // Nota el 'async' aquí
   const { nombre, telefono, direccion, total, estado, paypalOrderID, carrito } = req.body;
 
+  // VERIFICACIÓN DE SEGURIDAD (Nuevo paso)
+  if (paypalOrderID) {
+      const esValido = await verificarPagoPayPal(paypalOrderID);
+      if (!esValido) {
+          return res.status(400).json({ error: "El pago no pudo ser verificado con PayPal o no fue completado." });
+      }
+  }
+
+  // Si pasa la verificación, guardamos normalmente...
   const stmt = db.prepare(`
     INSERT INTO pedidos (nombre, telefono, direccion, total, estado, paypalOrderID, carrito)
     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -38,27 +83,27 @@ app.post("/api/pedidos", (req, res) => {
     paypalOrderID || "",
     JSON.stringify(carrito || []),
     function (err) {
-      if (err) return res.status(500).json({ error: err.message });
+      if (err) {
+        console.error("Error al insertar el pedido:", err.message);
+        return res.status(500).json({ error: err.message });
+      }
 
       // Actualizar stock
-        (carrito || []).forEach(item => {
+      (carrito || []).forEach(item => {
         db.get("SELECT stock FROM productos WHERE id=?", [item.id], (err, row) => {
-            if(err) return console.error(err.message);
-            if(row && row.stock >= item.quantity){
+          if(err) return console.error("Error al consultar stock:", err.message); 
+          if(row && row.stock >= item.quantity){
             db.run("UPDATE productos SET stock = stock - ? WHERE id=?", [item.quantity, item.id]);
-            } else {
-            console.warn(`No hay suficiente stock para ${item.id} (${item.quantity})`);
-            }
+          } else {
+            console.warn(`Stock insuficiente para ${item.id}`);
+          }
         });
-        });
+      });
 
-
-      res.json({ mensaje: "Pedido registrado y stock actualizado", id: this.lastID });
+      res.json({ mensaje: "Pedido verificado y registrado", id: this.lastID });
     }
   );
 });
-
-
 
 
 app.put("/api/pedidos/:id", (req, res) => {
@@ -71,6 +116,13 @@ app.put("/api/pedidos/:id", (req, res) => {
       res.json({ mensaje: "Pedido actualizado" });
     }
   );
+});
+
+app.delete("/api/pedidos/:id", (req, res) => {
+  db.run("DELETE FROM pedidos WHERE id=?", req.params.id, function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ mensaje: "Pedido eliminado" });
+  });
 });
 
 // ===== Rutas Productos =====
@@ -87,33 +139,11 @@ app.get("/api/productos", (req, res) => {
   });
 });
 
-
-app.post("/api/pedidos", (req, res) => {
-  const { nombre, telefono, direccion, total, paypalOrderID, carrito } = req.body;
-
-  const stmt = db.prepare(`
-    INSERT INTO pedidos (nombre, telefono, direccion, total, estado, paypalOrderID, carrito)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  stmt.run(
-    nombre || "", telefono || "", direccion || "",
-    parseFloat(total) || 0, 
-    "nuevo",  // <-- siempre inicia pendiente
-    paypalOrderID || "",
-    carrito ? JSON.stringify(carrito) : null,    
-  function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ mensaje: "Pedido registrado", id: this.lastID });
-    }
-  );
-});
-
-
-app.put("/api/productos/:id", upload.array("imagenes", 5), (req, res) => {
+// RUTA PUT /api/productos/:id (Actualizar producto. Límite de 10 imágenes)
+app.put("/api/productos/:id", upload.array("imagenes", 10), (req, res) => {
   const { name, price, stock, description } = req.body;
   const newImages = (req.files || []).map(f => `/uploads/${f.filename}`);
-  // Si subieron nuevas imágenes, se reemplaza el array; si no, se conservan
+  
   if (newImages.length > 0) {
     db.run(
       `UPDATE productos SET name=?, price=?, stock=?, description=?, images=? WHERE id=?`,
@@ -134,9 +164,9 @@ app.put("/api/productos/:id", upload.array("imagenes", 5), (req, res) => {
     );
   }
 });
-// ===== Agregar nuevo producto =====
-// ===== Agregar nuevo producto =====
-app.post("/api/productos", upload.array("imagenes", 5), (req, res) => {
+
+// RUTA POST /api/productos (Agregar nuevo producto. Límite de 10 imágenes)
+app.post("/api/productos", upload.array("imagenes", 10), (req, res) => {
   const { name, price, stock, description } = req.body;
   const images = (req.files || []).map(f => `/uploads/${f.filename}`);
 
@@ -159,7 +189,6 @@ app.post("/api/productos", upload.array("imagenes", 5), (req, res) => {
 });
 
 
-
 app.delete("/api/productos/:id", (req, res) => {
   db.run("DELETE FROM productos WHERE id=?", req.params.id, function (err) {
     if (err) return res.status(500).json({ error: err.message });
@@ -168,12 +197,11 @@ app.delete("/api/productos/:id", (req, res) => {
 });
 
 
-// ===== Servir admin.html =====
+// ===== Servir archivos HTML =====
 app.get("/admin.html", (req, res) => {
   res.sendFile(path.join(__dirname,"..", "admin.html"));
 });
 
-// ===== Página principal =====
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname,"..", "index.html"));
 });
