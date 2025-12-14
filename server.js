@@ -49,7 +49,7 @@ async function verificarPagoPayPal(orderID) {
 // ===== Middleware =====
 app.use(bodyParser.json());
 // Nota: Puedes reemplazar bodyParser.json() por app.use(express.json())
-app.use(express.static(path.join(__dirname, ".."))); // sirve HTML, JS, CSS
+app.use(express.static(path.join(__dirname))); // sirve HTML, JS, CSS
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // ===== Rutas Pedidos =====
 app.get("/api/pedidos", (req, res) => {
@@ -199,11 +199,11 @@ app.delete("/api/productos/:id", (req, res) => {
 
 // ===== Servir archivos HTML =====
 app.get("/admin.html", (req, res) => {
-  res.sendFile(path.join(__dirname,"..", "admin.html"));
+  res.sendFile(path.join(__dirname, "admin.html"));
 });
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname,"..", "index.html"));
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // ===== Iniciar servidor =====
