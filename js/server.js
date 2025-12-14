@@ -1,5 +1,5 @@
-const PAYPAL_CLIENT_ID = "PON_AQUI_EL_CLIENT_ID_DE_TU_CLIENTE";
-const PAYPAL_CLIENT_SECRET = "PON_AQUI_LA_SECRET_KEY_QUE_TE_PASARON";
+const PAYPAL_CLIENT_ID = "AZVVcaAQwRctEoniiSks4ddIeNrpUH9qfdVL8gzDdqIvP_fzxdE7VRgEsmEfxU3yzNGr2cKSEL9Iwdna";
+const PAYPAL_CLIENT_SECRET = "EHUrbjoNIrY_rz4btj8VirwB7VIYquB81zzuP6uoejnUPnP7TKpsDdCy6wt_IpbmahXXSV2z-3P9lmjE";
 const PAYPAL_API = "https://api-m.paypal.com"; // Usa "https://api-m.sandbox.paypal.com" si fuera prueba
 const express = require("express");
 const path = require("path");
