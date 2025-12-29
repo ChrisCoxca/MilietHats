@@ -149,35 +149,42 @@ document.addEventListener("DOMContentLoaded", () => {
       },
 
       onApprove: function (data, actions) {
-        let nombre = document.getElementById("nombre").value.trim();
-        let telefono = document.getElementById("telefono").value.trim();
-        let direccion = document.getElementById("direccion").value.trim();
-        let total = parseFloat(localStorage.getItem("totalCarrito")) || 0;
+        return actions.order.capture().then(function(details) {
+            console.log("Pago completado por: " + details.payer.name.given_name);
 
-        return fetch('/api/pedidos', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nombre,
-            telefono,
-            direccion,
-            total,
-            estado: "Pagado",
-            paypalOrderID: data.orderID,
-            carrito: cart
-          })
-        })
-          .then(res => res.json())
-          .then(res => {
-            alert("¡Pedido registrado con éxito! Gracias por tu compra.");
-            localStorage.removeItem("cart");
-            localStorage.removeItem("totalCarrito");
-            window.location.href = "index.html";
-          })
-          .catch(err => {
-              console.error(err);
-              alert("Hubo un error al registrar el pedido en la base de datos, pero el pago pasó. Contáctanos.");
-          });
+            let nombre = document.getElementById("nombre").value.trim();
+            let telefono = document.getElementById("telefono").value.trim();
+            let direccion = document.getElementById("direccion").value.trim();
+            let total = parseFloat(localStorage.getItem("totalCarrito")) || 0;
+
+            return fetch('/api/pedidos', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                nombre,
+                telefono,
+                direccion,
+                total,
+                estado: "Pagado",
+                paypalOrderID: data.orderID, 
+                carrito: cart
+              })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if(res.error) {
+                    alert("Error en el servidor: " + res.error);
+                } else {
+                    alert("¡Pedido registrado con éxito! Gracias por tu compra.");
+                    localStorage.removeItem("cart");
+                    localStorage.removeItem("totalCarrito");
+                    window.location.href = "index.html";
+                }
+            });
+        }).catch(function(err) {
+            console.error("Error al capturar fondos:", err);
+            alert("El pago fue autorizado, pero hubo un error al procesar el cobro final. No se ha generado el pedido.");
+        });
       },
 
       onError: err => {

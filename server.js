@@ -39,7 +39,7 @@ async function verificarPagoPayPal(orderID) {
         const ordenData = await ordenRes.json();
 
         // 3. Verificar que esté completada (COMPLETED o APPROVED)
-        return ordenData.status === "COMPLETED" || ordenData.status === "APPROVED";
+        return ordenData.status === "COMPLETED";
     } catch (error) {
         console.error("Error verificando PayPal:", error);
         return false;
