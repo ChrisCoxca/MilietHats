@@ -172,14 +172,27 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .then(res => res.json())
             .then(res => {
-                if(res.error) {
-                    alert("Error en el servidor: " + res.error);
-                } else {
-                    alert("¡Pedido registrado con éxito! Gracias por tu compra.");
-                    localStorage.removeItem("cart");
-                    localStorage.removeItem("totalCarrito");
-                    window.location.href = "index.html";
-                }
+              if (res.error) {
+                  Swal.fire({
+                      icon: 'error',
+                      title: 'Oops...',
+                      text: 'Hubo un error: ' + res.error,
+                  });
+              } else {
+                  Swal.fire({
+                      title: '¡Pago Exitoso!',
+                      text: 'Tu pedido ha sido procesado correctamente. Te enviaremos tus gorras pronto.',
+                      icon: 'success',
+                      confirmButtonColor: '#3085d6',
+                      confirmButtonText: 'Volver al inicio'
+                  }).then((result) => {
+                      if (result.isConfirmed) {
+                          localStorage.removeItem("cart");
+                          localStorage.removeItem("totalCarrito");
+                          window.location.href = "index.html";
+                      }
+                  });
+              }
             });
         }).catch(function(err) {
             console.error("Error al capturar fondos:", err);
