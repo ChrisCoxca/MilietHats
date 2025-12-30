@@ -144,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return actions.order.create({
           purchase_units: [{
             //amount: { value: total.toFixed(2) }
+            currency_code: "MXN",
             value: '5.00'
           }]
         });
