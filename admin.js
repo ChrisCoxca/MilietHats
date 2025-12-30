@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ==== Login simple ====
   const user = prompt("Usuario:");
   const pass = prompt("Contraseña:");
-  if (user !== "admin" || pass !== "1234") {
+  if (user !== "admin" || pass !== "Distroller2605") {
     alert("Acceso denegado");
     window.location.href = "index.html";
     return;
