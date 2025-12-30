@@ -143,7 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return actions.order.create({
           purchase_units: [{
-            amount: { value: total.toFixed(2) }
+            //amount: { value: total.toFixed(2) }
+            value: '5.00'
           }]
         });
       },
